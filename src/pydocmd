@@ -39,19 +39,19 @@ def doc_mod(mod_name, mod_inst):
            member_name not in mod_inst.__builtins__:
             uservars[member_name] = member_inst
     if uservars:
-        sys.stdout.write('Variables\n--------\n\nThe **%s** module defines the following variables.\n\n' % (mod_name))
+        sys.stdout.write('\nVariables\n--------\n\nThe **%s** module defines the following variables.\n\n' % (mod_name))
         for var_name, var_inst in uservars.items():
             sys.stdout.write('* %s: %s\n' % (var_name, var_inst))
 
     functions = inspect.getmembers(mod_inst, inspect.isfunction)
     if functions:
-        sys.stdout.write('Functions\n--------\n\nThe **%s** module defines the following functions.\n\n' % (mod_name))
+        sys.stdout.write('\nFunctions\n--------\n\nThe **%s** module defines the following functions.\n\n' % (mod_name))
         for func_name, func_inst in functions:
             doc_method(func_name, func_inst)
 
     classes = inspect.getmembers(mod_inst, inspect.isclass)
     if classes:
-        sys.stdout.write('Classes\n--------\n\nThe **%s** module defines the following classes.\n\n' % (mod_name))
+        sys.stdout.write('\nClasses\n--------\n\nThe **%s** module defines the following classes.\n\n' % (mod_name))
         for class_name, class_inst in classes:
             doc_class(class_name, class_inst)
 
@@ -59,14 +59,13 @@ def doc_class(class_name, class_inst):
     """
     Generate documentation a class.
     """
-    sys.stdout.write('### %s\n\n' % (class_name))
+    sys.stdout.write('\n### %s\n\n' % (class_name))
     class_doc = inspect.getdoc(class_inst)
     if class_doc:
         for line in class_doc.lstrip().splitlines():
             sys.stdout.write('%s\n' % (line.strip()))
         sys.stdout.write('\n')
 
-    sys.stdout.write("Methods:\n\n")
     methods = inspect.getmembers(class_inst, inspect.ismethod)
     for method_name, method_inst in methods:
         doc_method(method_name, method_inst)
@@ -92,11 +91,11 @@ def doc_method(method_name, method_inst):
                 out_args[a_pos + pos] = '%s=%s' % (out_args[a_pos + pos], default)
 
         # Print method documentation 
-        sys.stdout.write("* `%s(%s)`\n\n" % (method_name, ', '.join(out_args)))
+        sys.stdout.write("#### %s(%s)\n\n" % (method_name, ', '.join(out_args)))
         method_doc = inspect.getdoc(method_inst)
         if method_doc:
             for line in method_doc.lstrip().splitlines():
-                sys.stdout.write('   %s\n' % (line.strip()))
+                sys.stdout.write('%s\n' % (line.strip()))
             sys.stdout.write('\n')
 
 if __name__ == '__main__':
