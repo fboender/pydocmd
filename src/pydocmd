@@ -1,0 +1,118 @@
+#!/usr/bin/python
+
+"""
+pydocmd generates Python Module / script documentation in the Markdown (md)
+format. It was written to automatically generate documentation that can be put
+on Github or Bitbucket.
+
+It is as of yet not very complete and is more of a Proof-of-concept than a
+fully-fledged tool.
+
+Usage:
+
+    ./pydocmd file.py > file.md
+"""
+
+import sys
+import os
+import imp
+import inspect
+
+
+def doc_mod(mod_name, mod_inst):
+    """
+    Generate documentation for a module.
+    """
+    sys.stdout.write('%s\n' % (mod_name))
+    sys.stdout.write('=' * len(mod_name))
+    sys.stdout.write('\n')
+    mod_doc = inspect.getdoc(mod_inst)
+    if mod_doc:
+        sys.stdout.write('\n%s\n\n' % (mod_doc))
+
+    uservars = {}
+    for member_name, member_inst in inspect.getmembers(mod_inst):
+        if not member_name.startswith('_') and \
+           not inspect.isfunction(member_inst) and \
+           not inspect.isclass(member_inst) and \
+           not inspect.ismodule(member_inst) and \
+           member_name not in mod_inst.__builtins__:
+            uservars[member_name] = member_inst
+    if uservars:
+        sys.stdout.write('Variables\n--------\n\nThe **%s** module defines the following variables.\n\n' % (mod_name))
+        for var_name, var_inst in uservars.items():
+            sys.stdout.write('* %s: %s\n' % (var_name, var_inst))
+
+    functions = inspect.getmembers(mod_inst, inspect.isfunction)
+    if functions:
+        sys.stdout.write('Functions\n--------\n\nThe **%s** module defines the following functions.\n\n' % (mod_name))
+        for func_name, func_inst in functions:
+            doc_method(func_name, func_inst)
+
+    classes = inspect.getmembers(mod_inst, inspect.isclass)
+    if classes:
+        sys.stdout.write('Classes\n--------\n\nThe **%s** module defines the following classes.\n\n' % (mod_name))
+        for class_name, class_inst in classes:
+            doc_class(class_name, class_inst)
+
+def doc_class(class_name, class_inst):
+    """
+    Generate documentation a class.
+    """
+    sys.stdout.write('### %s\n\n' % (class_name))
+    class_doc = inspect.getdoc(class_inst)
+    if class_doc:
+        for line in class_doc.lstrip().splitlines():
+            sys.stdout.write('%s\n' % (line.strip()))
+        sys.stdout.write('\n')
+
+    sys.stdout.write("Methods:\n\n")
+    methods = inspect.getmembers(class_inst, inspect.ismethod)
+    for method_name, method_inst in methods:
+        doc_method(method_name, method_inst)
+    sys.stdout.write("\n")
+
+def doc_method(method_name, method_inst):
+    """
+    Generate documentation for a method.
+    """
+    if not method_name.startswith('_'):
+        # Get method arguments
+        method_args = inspect.getargspec(method_inst)
+        out_args = []
+        for arg in method_args.args:
+            if arg == 'self':
+                continue
+            out_args.append(arg)
+
+        # Apply default argumument values to arguments
+        if method_args.defaults:
+            a_pos = len(out_args) - len(method_args.defaults)
+            for pos, default in enumerate(method_args.defaults):
+                out_args[a_pos + pos] = '%s=%s' % (out_args[a_pos + pos], default)
+
+        # Print method documentation 
+        sys.stdout.write("* `%s(%s)`\n\n" % (method_name, ', '.join(out_args)))
+        method_doc = inspect.getdoc(method_inst)
+        if method_doc:
+            for line in method_doc.lstrip().splitlines():
+                sys.stdout.write('   %s\n' % (line.strip()))
+            sys.stdout.write('\n')
+
+if __name__ == '__main__':
+    try:
+        in_f = sys.argv[1]
+    except IndexError:
+        sys.stderr.write('Usage: %s <file.py>\n' % (sys.argv[0]))
+        sys.exit(1)
+
+    mod_inst = imp.load_source('', in_f)
+    if not mod_inst:
+        sys.stderr.write("Failed to import '%s'\n" % (in_f))
+        sys.exit(2)
+
+    mod_name = inspect.getmodulename(in_f)
+    if not mod_name:
+        mod_name = os.path.splitext(os.path.basename(in_f))[0]
+
+    doc_mod(mod_name, mod_inst)
