@@ -18,85 +18,244 @@ import os
 import imp
 import inspect
 
+import pprint
 
-def doc_mod(mod_name, mod_inst):
+def fmt_doc(doc, indent=''):
     """
-    Generate documentation for a module.
+    Format a doc-string.
     """
-    sys.stdout.write('%s\n' % (mod_name))
-    sys.stdout.write('=' * len(mod_name))
-    sys.stdout.write('\n')
+    s = ''
+    for line in doc.lstrip().splitlines():
+        s += '%s%s\n' % (indent, line.strip())
+    return s.rstrip()
+
+def insp_file(file_name):
+    """
+    Inspect a file and return module information
+    """
+    mod_inst = imp.load_source('', file_name)
+    if not mod_inst:
+        sys.stderr.write("Failed to import '%s'\n" % (file_name))
+        sys.exit(2)
+
+    mod_name = inspect.getmodulename(file_name)
+    if not mod_name:
+        mod_name = os.path.splitext(os.path.basename(file_name))[0]
+
+    return insp_mod(mod_name, mod_inst)
+
+def insp_mod(mod_name, mod_inst):
+    """
+    Inspect a module return doc, vars, functions and classes.
+    """
+    info = {
+        'name': mod_name,
+        'inst': mod_inst,
+        'doc': '',
+        'vars': [],
+        'functions': [],
+        'classes': [],
+    }
+
+    # Get module documentation
     mod_doc = inspect.getdoc(mod_inst)
     if mod_doc:
-        sys.stdout.write('\n%s\n\n' % (mod_doc))
+        info['doc'] = fmt_doc(mod_doc)
 
-    uservars = {}
+    # Get module global vars
     for member_name, member_inst in inspect.getmembers(mod_inst):
         if not member_name.startswith('_') and \
            not inspect.isfunction(member_inst) and \
            not inspect.isclass(member_inst) and \
            not inspect.ismodule(member_inst) and \
            member_name not in mod_inst.__builtins__:
-            uservars[member_name] = member_inst
-    if uservars:
-        sys.stdout.write('\nVariables\n--------\n\nThe **%s** module defines the following variables.\n\n' % (mod_name))
-        for var_name, var_inst in uservars.items():
-            sys.stdout.write('* %s: %s\n' % (var_name, var_inst))
+            info['vars'].append( (member_name, member_inst) )
 
+    # Get module functions
     functions = inspect.getmembers(mod_inst, inspect.isfunction)
     if functions:
-        sys.stdout.write('\nFunctions\n--------\n\nThe **%s** module defines the following functions.\n\n' % (mod_name))
         for func_name, func_inst in functions:
-            doc_method(func_name, func_inst)
+            info['functions'].append(insp_method(func_name, func_inst))
 
     classes = inspect.getmembers(mod_inst, inspect.isclass)
     if classes:
-        sys.stdout.write('\nClasses\n--------\n\nThe **%s** module defines the following classes.\n\n' % (mod_name))
         for class_name, class_inst in classes:
-            doc_class(class_name, class_inst)
+            info['classes'].append(insp_class(class_name, class_inst))
 
-def doc_class(class_name, class_inst):
+    return info
+
+def insp_class(class_name, class_inst):
     """
-    Generate documentation a class.
+    Inspect class and return doc, methods.
     """
-    sys.stdout.write('\n### %s\n\n' % (class_name))
+    info = {
+        'name': class_name,
+        'inst': class_inst,
+        'doc': '',
+        'methods': [],
+    }
+
+    # Get class documentation
     class_doc = inspect.getdoc(class_inst)
     if class_doc:
-        for line in class_doc.lstrip().splitlines():
-            sys.stdout.write('%s\n' % (line.strip()))
-        sys.stdout.write('\n')
+        info['doc'] = fmt_doc(class_doc)
 
+    # Get class methods
     methods = inspect.getmembers(class_inst, inspect.ismethod)
     for method_name, method_inst in methods:
-        doc_method(method_name, method_inst)
-    sys.stdout.write("\n")
+        info['methods'].append(insp_method(method_name, method_inst))
 
-def doc_method(method_name, method_inst):
+    return info
+
+def insp_method(method_name, method_inst):
     """
-    Generate documentation for a method.
+    Inspect a method and return arguments, doc.
     """
-    if not method_name.startswith('_'):
-        # Get method arguments
-        method_args = inspect.getargspec(method_inst)
-        out_args = []
-        for arg in method_args.args:
-            if arg == 'self':
+    info = {
+        'name': method_name,
+        'inst': method_inst,
+        'args': [],
+        'doc': ''
+    }
+
+    # Get method arguments
+    method_args = inspect.getargspec(method_inst)
+    for arg in method_args.args:
+        if arg != 'self':
+            info['args'].append(arg)
+
+    # Apply default argumument values to arguments
+    if method_args.defaults:
+        a_pos = len(info['args']) - len(method_args.defaults)
+        for pos, default in enumerate(method_args.defaults):
+            info['args'][a_pos + pos] = '%s=%s' % (info['args'][a_pos + pos], default)
+
+    # Print method documentation 
+    method_doc = inspect.getdoc(method_inst)
+    if method_doc:
+        info['doc'] = fmt_doc(method_doc)
+
+    return info
+
+#def doc_mod(mod_name, mod_inst):
+#    """
+#            doc_class(class_name, class_inst)
+#    Generate documentation for a module.
+#    """
+#    sys.stdout.write('%s\n' % (mod_name))
+#    sys.stdout.write('=' * len(mod_name))
+#    sys.stdout.write('\n')
+#    mod_doc = inspect.getdoc(mod_inst)
+#    if mod_doc:
+#        sys.stdout.write('\n%s\n\n' % (mod_doc))
+#
+#    uservars = {}
+#    for member_name, member_inst in inspect.getmembers(mod_inst):
+#        if not member_name.startswith('_') and \
+#           not inspect.isfunction(member_inst) and \
+#           not inspect.isclass(member_inst) and \
+#           not inspect.ismodule(member_inst) and \
+#           member_name not in mod_inst.__builtins__:
+#            uservars[member_name] = member_inst
+#    if uservars:
+#        sys.stdout.write('\nVariables\n--------\n\nThe **%s** module defines the following variables.\n\n' % (mod_name))
+#        for var_name, var_inst in uservars.items():
+#            sys.stdout.write('* %s: %s\n' % (var_name, var_inst))
+#
+#    functions = inspect.getmembers(mod_inst, inspect.isfunction)
+#    if functions:
+#        sys.stdout.write('\nFunctions\n--------\n\nThe **%s** module defines the following functions.\n\n' % (mod_name))
+#        for func_name, func_inst in functions:
+#            doc_method(func_name, func_inst)
+#
+#    classes = inspect.getmembers(mod_inst, inspect.isclass)
+#    if classes:
+#        sys.stdout.write('\nClasses\n--------\n\nThe **%s** module defines the following classes.\n\n' % (mod_name))
+#        for class_name, class_inst in classes:
+#            doc_class(class_name, class_inst)
+#
+#def doc_class(class_name, class_inst):
+#    """
+#    Generate documentation a class.
+#    """
+#    sys.stdout.write('\n### %s\n\n' % (class_name))
+#    class_doc = inspect.getdoc(class_inst)
+#    if class_doc:
+#        for line in class_doc.lstrip().splitlines():
+#            sys.stdout.write('%s\n' % (line.strip()))
+#        sys.stdout.write('\n')
+#
+#    methods = inspect.getmembers(class_inst, inspect.ismethod)
+#    for method_name, method_inst in methods:
+#        doc_method(method_name, method_inst)
+#    sys.stdout.write("\n")
+#
+#def doc_method(method_name, method_inst):
+#    """
+#    Generate documentation for a method.
+#    """
+#    if not method_name.startswith('_'):
+#        # Get method arguments
+#        method_args = inspect.getargspec(method_inst)
+#        out_args = []
+#        for arg in method_args.args:
+#            if arg == 'self':
+#                continue
+#            out_args.append(arg)
+#
+#        # Apply default argumument values to arguments
+#        if method_args.defaults:
+#            a_pos = len(out_args) - len(method_args.defaults)
+#            for pos, default in enumerate(method_args.defaults):
+#                out_args[a_pos + pos] = '%s=%s' % (out_args[a_pos + pos], default)
+#
+#        # Print method documentation 
+#        sys.stdout.write("#### `%s(%s)`\n\n" % (method_name, ', '.join(out_args)))
+#        method_doc = inspect.getdoc(method_inst)
+#        if method_doc:
+#            for line in method_doc.lstrip().splitlines():
+#                sys.stdout.write('%s\n' % (line.strip()))
+#            sys.stdout.write('\n')
+
+def out_file(file_i):
+    print "%s\n%s\n" % (file_i['name'], '=' * len(file_i['name']))
+    print file_i['doc']
+
+    print "\nVariables\n----------\n"
+    if not file_i['vars']:
+        print "This file does not define any variables\n"
+    for var_name, var_inst in file_i['vars']:
+        print "* `%s`: %s" % (var_name, var_inst)
+
+    print "\nFunctions\n----------\n"
+    if not file_i['functions']:
+        print "This file does not define any top-level functions\n"
+    for function_i in file_i['functions']:
+        if function_i['name'].startswith('_'):
+            continue
+        print "### def `%s(%s)`" % (function_i['name'], ', '.join(function_i['args']))
+        if function_i['doc']:
+            print "%s" % (function_i['doc'])
+        else:
+            print "No documentation for this function"
+
+    print "\nClasses\n----------\n"
+    if not file_i['classes']:
+        print "This file does not define any classes functions\n"
+    for class_i in file_i['classes']:
+        print "\n### class `%s()`\n" % (class_i['name'])
+        if class_i['doc']:
+            print "%s\n" % (class_i['doc'])
+        else:
+            print "No documentation for this class\n"
+
+        print "Methods:\n"
+        for method_i in class_i['methods']:
+            if method_i['name'].startswith('_'):
                 continue
-            out_args.append(arg)
+            print "#### def `%s(%s)`\n" % (method_i['name'], ', '.join(method_i['args']))
+            print "%s\n" % (method_i['doc'])
 
-        # Apply default argumument values to arguments
-        if method_args.defaults:
-            a_pos = len(out_args) - len(method_args.defaults)
-            for pos, default in enumerate(method_args.defaults):
-                out_args[a_pos + pos] = '%s=%s' % (out_args[a_pos + pos], default)
-
-        # Print method documentation 
-        sys.stdout.write("#### %s(%s)\n\n" % (method_name, ', '.join(out_args)))
-        method_doc = inspect.getdoc(method_inst)
-        if method_doc:
-            for line in method_doc.lstrip().splitlines():
-                sys.stdout.write('%s\n' % (line.strip()))
-            sys.stdout.write('\n')
 
 if __name__ == '__main__':
     try:
@@ -105,13 +264,6 @@ if __name__ == '__main__':
         sys.stderr.write('Usage: %s <file.py>\n' % (sys.argv[0]))
         sys.exit(1)
 
-    mod_inst = imp.load_source('', in_f)
-    if not mod_inst:
-        sys.stderr.write("Failed to import '%s'\n" % (in_f))
-        sys.exit(2)
-
-    mod_name = inspect.getmodulename(in_f)
-    if not mod_name:
-        mod_name = os.path.splitext(os.path.basename(in_f))[0]
-
-    doc_mod(mod_name, mod_inst)
+    #pprint.pprint( insp_file(in_f) )
+    file_i = insp_file(in_f)
+    out_file(file_i)
