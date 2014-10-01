@@ -251,7 +251,9 @@ def out_file(file_i):
 
         print "Methods:\n"
         for method_i in class_i['methods']:
-            if method_i['name'].startswith('_'):
+            if method_i['name'] == '__init__':
+                method_i['name'] = '\_\_init\_\_'
+            elif method_i['name'].startswith('_'):
                 continue
             print "#### def `%s(%s)`\n" % (method_i['name'], ', '.join(method_i['args']))
             print "%s\n" % (method_i['doc'])
