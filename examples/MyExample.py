@@ -7,6 +7,15 @@ An example Python file to demonstrate and test the pydocmd Markdown generator.
 import sys
 import os
 
+
+__author__ = "Ferry Boender"
+__copyright__ = "Copyright 2014, Ferry Boender"
+__license__ = "MIT (expat) License"
+__version__ = "0.1"
+__maintainer__ = "Ferry Boender"
+__email__ = "ferry.boender@gmail.com"
+
+
 CONST_BLUE="#0000FF"
 CONST_RED="#FF0000"
 
