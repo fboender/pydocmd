@@ -15,12 +15,13 @@ Usage:
 
 """
 
+
 import sys
 import os
 import imp
 import inspect
-
 import pprint
+
 
 def fmt_doc(doc, indent=''):
     """
@@ -53,6 +54,7 @@ def insp_mod(mod_name, mod_inst):
     info = {
         'name': mod_name,
         'inst': mod_inst,
+        'author': {},
         'doc': '',
         'vars': [],
         'functions': [],
@@ -63,6 +65,10 @@ def insp_mod(mod_name, mod_inst):
     mod_doc = inspect.getdoc(mod_inst)
     if mod_doc:
         info['doc'] = fmt_doc(mod_doc)
+
+    for attr_name in ['author', 'copyright', 'license', 'version', 'maintainer', 'email']:
+        if hasattr(mod_inst, '__%s__' % (attr_name)):
+            info['author'][attr_name] = getattr(mod_inst, '__%s__' % (attr_name))
 
     # Get module global vars
     for member_name, member_inst in inspect.getmembers(mod_inst):
@@ -142,7 +148,24 @@ def insp_method(method_name, method_inst):
 
 def out_file(file_i):
     print "%s\n%s\n" % (file_i['name'], '=' * len(file_i['name']))
-    print file_i['doc']
+    print file_i['doc'] + '\n'
+
+    author = ''
+    if 'author' in file_i['author']:
+        author += file_i['author']['author'] + ' '
+    if 'email' in file_i['author']:
+        author += '<%s>' % (file_i['author']['email'])
+    if author:
+        print "* __Author__: %s" % (author)
+
+    author_attrs = [
+        ('Version', 'version'),
+        ('Copyright', 'copyright'),
+        ('License', 'license'),
+    ]
+    for attr_friendly, attr_name in author_attrs:
+        if attr_name in file_i['author']:
+            print "* __%s__: %s" % (attr_friendly, file_i['author'][attr_name])
 
     print "\nVariables\n----------\n"
     if not file_i['vars']:
@@ -189,6 +212,5 @@ if __name__ == '__main__':
         sys.stderr.write('Usage: %s <file.py>\n' % (sys.argv[0]))
         sys.exit(1)
 
-    #pprint.pprint( insp_file(in_f) )
     file_i = insp_file(in_f)
     out_file(file_i)
