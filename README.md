@@ -10,13 +10,16 @@ fully-fledged tool. Markdown is also a very restricted format and every
 implementation works subtly, or completely, different. This means output
 may be different on different converters.
 
-Usage:
+Usage
+-----
 
-./pydocmd file.py > file.md
+    ./pydocmd file.py > file.md
 
-Example:
+Example output
+--------------
 
-See https://bitbucket.org/fboender/pydocmd/wiki/Example for an example output.
+* https://bitbucket.org/fboender/pydocmd/wiki/Example
+* https://bitbucket.org/fboender/pydocmd/wiki/Example2
 
 * __Author__: Ferry Boender <ferry.boender@gmail.com>
 * __Version__: 0.1
