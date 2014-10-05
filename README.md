@@ -10,6 +10,11 @@ fully-fledged tool. Markdown is also a very restricted format and every
 implementation works subtly, or completely, different. This means output
 may be different on different converters.
 
+* __Author__: Ferry Boender <ferry.boender@gmail.com>
+* __Version__: 0.1
+* __Copyright__: Copyright 2014, Ferry Boender
+* __License__: MIT (expat) License
+
 Usage
 -----
 
@@ -20,9 +25,4 @@ Example output
 
 * https://bitbucket.org/fboender/pydocmd/wiki/Example
 * https://bitbucket.org/fboender/pydocmd/wiki/Example2
-
-* __Author__: Ferry Boender <ferry.boender@gmail.com>
-* __Version__: 0.1
-* __Copyright__: Copyright 2014, Ferry Boender
-* __License__: MIT (expat) License
 
