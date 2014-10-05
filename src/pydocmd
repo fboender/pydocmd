@@ -156,7 +156,7 @@ def out_file(file_i):
     for function_i in file_i['functions']:
         if function_i['name'].startswith('_'):
             continue
-        print "### def `%s(%s)`" % (function_i['name'], ', '.join(function_i['args']))
+        print "### def `%s(%s)`\n" % (function_i['name'], ', '.join(function_i['args']))
         if function_i['doc']:
             print "%s" % (function_i['doc'])
         else:
@@ -166,7 +166,7 @@ def out_file(file_i):
     if not file_i['classes']:
         print "This file does not define any classes functions\n"
     for class_i in file_i['classes']:
-        print "\n### class `%s()`\n" % (class_i['name'])
+        print "### class `%s()`\n" % (class_i['name'])
         if class_i['doc']:
             print "%s\n" % (class_i['doc'])
         else:
