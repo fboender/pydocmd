@@ -29,7 +29,7 @@ def hello(name="World"):
 class Arithmetic:
     """
     Arithmetic is an arithmetic class that can perform summing or subtraction
-    on twho numbers.
+    on two numbers.
     """
     def __init__(self, x, y):
         """
