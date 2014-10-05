@@ -23,6 +23,14 @@ import inspect
 import pprint
 
 
+__author__ = "Ferry Boender"
+__copyright__ = "Copyright 2014, Ferry Boender"
+__license__ = "MIT (expat) License"
+__version__ = "0.1"
+__maintainer__ = "Ferry Boender"
+__email__ = "ferry.boender@gmail.com"
+
+
 def fmt_doc(doc, indent=''):
     """
     Format a doc-string.
