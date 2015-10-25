@@ -23,6 +23,6 @@ Usage
 Example output
 --------------
 
-* https://bitbucket.org/fboender/pydocmd/wiki/Example
-* https://bitbucket.org/fboender/pydocmd/wiki/Example2
+* https://github.com/fboender/pydocmd/wiki/Example-output-1
+* https://github.com/fboender/pydocmd/wiki/Example-output-2
 
