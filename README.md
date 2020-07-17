@@ -26,3 +26,10 @@ Example output
 * https://github.com/fboender/pydocmd/wiki/Example-output-1
 * https://github.com/fboender/pydocmd/wiki/Example-output-2
 
+Installation
+------------
+
+Install with pip:
+
+    pip install pydocmd
+
