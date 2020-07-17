@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """
 pydocmd generates Python Module / script documentation in the Markdown (md)
@@ -23,7 +23,6 @@ Example output
 
 """
 
-
 import sys
 import os
 import imp
@@ -34,7 +33,7 @@ import pprint
 __author__ = "Ferry Boender"
 __copyright__ = "Copyright 2014, Ferry Boender"
 __license__ = "MIT (expat) License"
-__version__ = "0.1"
+__version__ = "1.0"
 __maintainer__ = "Ferry Boender"
 __email__ = "ferry.boender@gmail.com"
 
@@ -154,7 +153,7 @@ def insp_method(method_name, method_inst):
         for pos, default in enumerate(method_args.defaults):
             info['args'][a_pos + pos] = '%s=%s' % (info['args'][a_pos + pos], default)
 
-    # Print method documentation 
+    # Print method documentation
     method_doc = inspect.getdoc(method_inst)
     if method_doc:
         info['doc'] = fmt_doc(method_doc)
@@ -163,8 +162,8 @@ def insp_method(method_name, method_inst):
 
 
 def out_file(file_i):
-    print "%s\n%s\n" % (file_i['name'], '=' * len(file_i['name']))
-    print file_i['doc'] + '\n'
+    print("%s\n%s\n" % (file_i['name'], '=' * len(file_i['name'])))
+    print(file_i['doc'] + '\n')
 
     author = ''
     if 'author' in file_i['author']:
@@ -172,7 +171,7 @@ def out_file(file_i):
     if 'email' in file_i['author']:
         author += '<%s>' % (file_i['author']['email'])
     if author:
-        print "* __Author__: %s" % (author)
+        print("* __Author__: %s" % (author))
 
     author_attrs = [
         ('Version', 'version'),
@@ -181,42 +180,42 @@ def out_file(file_i):
     ]
     for attr_friendly, attr_name in author_attrs:
         if attr_name in file_i['author']:
-            print "* __%s__: %s" % (attr_friendly, file_i['author'][attr_name])
+            print("* __%s__: %s" % (attr_friendly, file_i['author'][attr_name]))
 
-    print "\nVariables\n----------\n"
+    print("\nVariables\n----------\n")
     if not file_i['vars']:
-        print "This file does not define any variables\n"
+        print("This file does not define any variables\n")
     for var_name, var_inst in file_i['vars']:
-        print "* `%s`: %s" % (var_name, var_inst)
+        print("* `%s`: %s" % (var_name, var_inst))
 
-    print "\nFunctions\n----------\n"
+    print("\nFunctions\n----------\n")
     if not file_i['functions']:
-        print "This file does not define any top-level functions\n"
+        print("This file does not define any top-level functions\n")
     for function_i in file_i['functions']:
         if function_i['name'].startswith('_'):
             continue
-        print "### def `%s(%s)`\n" % (function_i['name'], ', '.join(function_i['args']))
+        print("### def `%s(%s)`\n" % (function_i['name'], ', '.join(function_i['args'])))
         if function_i['doc']:
-            print "%s" % (function_i['doc'])
+            print("%s" % (function_i['doc']))
         else:
-            print "No documentation for this function"
+            print("No documentation for this function")
 
-    print "\nClasses\n----------\n"
+    print("\nClasses\n----------\n")
     if not file_i['classes']:
-        print "This file does not define any classes functions\n"
+        print("This file does not define any classes functions\n")
     for class_i in file_i['classes']:
-        print "### class `%s()`\n" % (class_i['name'])
+        print("### class `%s()`\n" % (class_i['name']))
         if class_i['doc']:
-            print "%s\n" % (class_i['doc'])
+            print("%s\n" % (class_i['doc']))
         else:
-            print "No documentation for this class\n"
+            print("No documentation for this class\n")
 
-        print "Methods:\n"
+        print("Methods:\n")
         for method_i in class_i['methods']:
             if method_i['name'] != '__init__' and method_i['name'].startswith('_'):
                 continue
-            print "#### def `%s(%s)`\n" % (method_i['name'], ', '.join(method_i['args']))
-            print "%s\n" % (method_i['doc'])
+            print("#### def `%s(%s)`\n" % (method_i['name'], ', '.join(method_i['args'])))
+            print("%s\n" % (method_i['doc']))
 
 
 if __name__ == '__main__':
